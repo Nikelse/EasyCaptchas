@@ -1,8 +1,22 @@
 <?php
+/* frontal controller
+* create a captcha image in php with random generated string to validate */
 
-/* SCRIPT FRONTAL AFFICHAGE DE CAPTCHA
-* AFFICHER UNE IMAGE GÉNÉRÉE EN PHP */
+echo "
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Easy Captchas Generator</title>
+  </head>
+  <body>
 
-echo "<img src='script-captchas.php' alt='captchas' />";
+    <img src='script-captchas.php' alt='captchas' />
+
+    <br />
+
+    <a href=''>refresh</a>
+    
+  </body>
+</html>";
 
 ?>

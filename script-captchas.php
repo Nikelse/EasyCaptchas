@@ -1,74 +1,75 @@
 <?php
+/* captcha image generator function
+* caution no error report at generation */
 
-/****************************************************************
-* CAPTCHA GENERATEUR IMAGE EN PHP
-* /!\ PAS DE RETOUR D'ERREUR SUR LA GÉNÉRATION
-* SCRIPT ALLEGÉ SANS OPTIMISATION POUR LA COMPRÉHENSION
-*****************************************************************/
+/* data members set up
+* ------------------------------------------------------------- */
+/* string size number */
+$digit = 10;
 
-/****************************************************************
-* 1. PARAMETRAGE DES ATTRIBUTS VARIABLES
-*****************************************************************/
-/* CHAINE DE CARACTÈRE PARAMÈTRABLE
-* SUPPRESSION DE 1 & I POUR ÉVITER LA CONFUSION DE LECTURE */
+/* string setup (prevent 1 and i for confusion) */
 $chaine = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
 
-/* CREATION de l'image par defaut en background */
-$image = imagecreatefrompng('Images/captcha_1.png');
+/* default background image */
+$image_file = 'Images/captcha.png';
 
-/* COULEUR DES CARACTERES */
-$color = imagecolorallocate($image, 140, 0, 140);
-
-/* POLICE DES CARACTERES TRUETYPE */
+/* truetype font */
 $font = 'Fonts/Cartoon.ttf';
 
-/****************************************************************
-* 2. FONCTIONS ET PROCEDURES
-*****************************************************************/
+/* image string setup */
+$PARAMS = array (
+	"size"			=> 34,
+	"angle_max"	=> 35,
+	"space_max"	=> 2,
+	"top"				=> 70,
+	"color"			=> array(140, 0, 140)
+);
 
-/* NOMBRE DE DIGIT & CHAINE PARAMETRABLES */
+/* functions
+* ------------------------------------------------------------- */
+/* digit number and setup code generation */
 function getCode($length, $chars) {
 	$code = null;
-	for ( $i=0; $i < $length; $i++ )
-		{
+	for ($i = 0; $i < $length; $i++) {
 		$code .= $chars { mt_rand( 0, strlen($chars) - 1 ) };
 		}
 	return $code;
 	};
 
-/****************************************************************
-* 3. PROCEDURES DE GENERATION DYNAMIQUE DE L'IMAGE
-*****************************************************************/
+/* procedural image generation
+* ------------------------------------------------------------- */
+/* init image file based on */
+$image = imagecreatefrompng($image_file);
 
-/* APPEL DE LA FONCTION POUR RECUPERER UNE CHAINE ALEATOIRE */
-$code = getCode(5, $chaine);
+/* string coloration */
+$color = imagecolorallocate($image, $PARAMS['color'][0], $PARAMS['color'][1], $PARAMS['color'][2]);
 
-/* RETOURNE UN A UN LES SEGMENTS DE LA CHAINE */
-$char1 = substr($code,0,1);
-$char2 = substr($code,1,1);
-$char3 = substr($code,2,1);
-$char4 = substr($code,3,1);
-$char5 = substr($code,4,1);
+/* function call to get random string
+* easily recover to submit form and compare result */
+$code = getCode($digit, $chaine);
 
-/* DESSINE UN TEXTE AVEC UNE POLICE TRUETYPE
-* PARAMS : IMAGE / TAILLE / ANGLE / POSX / POSY / COULEUR/ POLICE / CARACTERE */
-imagettftext($image, 28, -10, 0, 37, $color, $font, $char1);
-imagettftext($image, 28, 20, 37, 37, $color, $font, $char2);
-imagettftext($image, 28, -35, 55, 37, $color, $font, $char3);
-imagettftext($image, 28, 25, 100, 37, $color, $font, $char4);
-imagettftext($image, 28, -15, 120, 37, $color, $font, $char5);
+/* chars in the string threated one by one */
+for ($nb = 0; $nb < $digit; $nb++) {
 
-/****************************************************************
-* 4. PROCEDURES DE GENERATION DYNAMIQUE DE L'IMAGE
-*****************************************************************/
+	$char = substr($code, $nb, 1);
+	/* string placement with randomized negative angle limiter */
+	$angle = rand($PARAMS['angle_max'] * -1, $PARAMS['angle_max']);
+	/* string placement with randomized space limiter */
+	$posx = ($nb > 0) ? $posx + rand(0, $PARAMS['space_max']) + $PARAMS['size'] : 10;
+	/* string placement over image */
+	imagettftext($image, $PARAMS['size'], $angle, $posx, $PARAMS['top'], $color, $font, $char);
+	}
 
-/* ENTETE HTTP A RENVOYER POUR LA GENERATION DE L'iMAGE */
+/* image processing
+* ------------------------------------------------------------- */
+
+/* http header to send before */
 header('Content-Type: image/png');
 
-/* ENVOI DE L'IMAGE PNG GENERÉE AU NAVIGATEUR */
+/* png file generated for browser */
 imagepng($image);
 
-/* DESTRUCTION DE L'IMAGE LIBÉRATION DE MÉMOIRE */
+/* image destruct memory alloc */
 imagedestroy($image);
 
 ?>
